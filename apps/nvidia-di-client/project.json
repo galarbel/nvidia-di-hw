@@ -1,0 +1,9 @@
+{
+  "name": "nvidia-di-client",
+  "$schema": "../../node_modules/nx/schemas/project-schema.json",
+  "sourceRoot": "apps/nvidia-di-client/src",
+  "projectType": "application",
+  "tags": [],
+  "// targets": "to see all targets run: nx show project nvidia-di-client --web",
+  "targets": {}
+}
