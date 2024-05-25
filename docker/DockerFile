@@ -1,0 +1,13 @@
+FROM node:22.2-alpine
+
+
+WORKDIR /app
+
+COPY . .
+
+RUN npm i -g pnpm@8
+RUN pnpm i
+
+CMD ["pnpm", "start"]
+
+
