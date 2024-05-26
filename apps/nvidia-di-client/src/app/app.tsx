@@ -1,6 +1,4 @@
-import styled from '@emotion/styled';
-
-import NxWelcome from './nx-welcome';
+import styled from "@emotion/styled";
 
 const StyledApp = styled.div`
   // Your style here
@@ -8,9 +6,7 @@ const StyledApp = styled.div`
 
 export function App() {
   return (
-    <StyledApp>
-      <NxWelcome title="nvidia-di-client" />
-    </StyledApp>
+    <StyledApp />
   );
 }
 

@@ -1,13 +1,25 @@
 {
   "root": true,
   "ignorePatterns": ["**/*"],
-  "plugins": ["@nx"],
+  "plugins": ["@nx", "import"],
+  "extends": [
+    "plugin:@nx/react",
+    "airbnb",
+    "airbnb-typescript",
+    "airbnb/hooks",
+    "plugin:@typescript-eslint/recommended",
+    "plugin:@typescript-eslint/eslint-recommended",
+    "eslint:recommended"
+  ],
   "overrides": [
     {
       "files": ["*.ts", "*.tsx", "*.js", "*.jsx"],
       "rules": {
+        "react/react-in-jsx-scope": "off",
+        "@typescript-eslint/no-unused-vars": "warn",
+        "no-unused-vars": "warn",
         "@nx/enforce-module-boundaries": [
-          "error",
+          "warn",
           {
             "enforceBuildableLibDependency": true,
             "allow": [],
@@ -18,25 +30,31 @@
               }
             ]
           }
-        ]
+        ],
+        "import/no-named-as-default": "off",
+        "quotes": "off",
+        "@typescript-eslint/quotes": ["warn", "double"],
+        "linebreak-style": "off",
+        "object-curly-newline": "off",
+        "max-len": [
+          "warn",
+          {
+            "ignoreComments": true,
+            "code": 170,
+            "ignoreTrailingComments": true,
+            "ignoreUrls": true,
+            "ignoreStrings": true,
+            "ignoreRegExpLiterals": true
+          }
+        ],
+        "react/jsx-one-expression-per-line": "off",
+        "@typescript-eslint/no-unused-expressions": [
+          "warn",
+          { "allowShortCircuit": true, "allowTernary": true }
+        ],
+        "no-debugger": "warn",
+        "no-console": ["warn", { "allow": ["error"] }]
       }
-    },
-    {
-      "files": ["*.ts", "*.tsx"],
-      "extends": ["plugin:@nx/typescript"],
-      "rules": {}
-    },
-    {
-      "files": ["*.js", "*.jsx"],
-      "extends": ["plugin:@nx/javascript"],
-      "rules": {}
-    },
-    {
-      "files": ["*.spec.ts", "*.spec.tsx", "*.spec.js", "*.spec.jsx"],
-      "env": {
-        "jest": true
-      },
-      "rules": {}
     }
   ]
 }

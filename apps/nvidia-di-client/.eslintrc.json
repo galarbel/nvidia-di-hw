@@ -4,6 +4,9 @@
   "overrides": [
     {
       "files": ["*.ts", "*.tsx", "*.js", "*.jsx"],
+      "parserOptions": {
+        "project": ["apps/nvidia-di-client/tsconfig.*?.json"]
+      },
       "rules": {}
     },
     {
