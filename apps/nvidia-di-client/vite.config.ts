@@ -1,23 +1,26 @@
 /// <reference types='vitest' />
-import { nxViteTsPaths } from '@nx/vite/plugins/nx-tsconfig-paths.plugin';
-import react from '@vitejs/plugin-react';
-import { defineConfig } from 'vite';
+/* eslint-disable import/no-extraneous-dependencies */
+import { nxViteTsPaths } from "@nx/vite/plugins/nx-tsconfig-paths.plugin";
+import react from "@vitejs/plugin-react";
+import { defineConfig } from "vite";
+import eslint from "vite-plugin-eslint";
 
 export default defineConfig({
   root: __dirname,
-  cacheDir: '../../node_modules/.vite/apps/nvidia-di-client',
+
+  cacheDir: "../../node_modules/.vite/apps/nvidia-di-client",
 
   server: {
     port: 4200,
-    host: true
+    host: true,
   },
 
   preview: {
     port: 4300,
-    host: 'localhost',
+    host: "localhost",
   },
 
-  plugins: [react(), nxViteTsPaths()],
+  plugins: [react(), nxViteTsPaths(), eslint()],
 
   // Uncomment this if you are using workers.
   // worker: {
@@ -25,7 +28,7 @@ export default defineConfig({
   // },
 
   build: {
-    outDir: '../../dist/apps/nvidia-di-client',
+    outDir: "../../dist/apps/nvidia-di-client",
     emptyOutDir: true,
     reportCompressedSize: true,
     commonjsOptions: {
