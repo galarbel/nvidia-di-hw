@@ -1,0 +1,20 @@
+# Dockerfile
+FROM mongo:latest
+
+# Set environment variables
+ENV MONGO_INITDB_ROOT_USERNAME=root
+ENV MONGO_INITDB_ROOT_PASSWORD=example
+ENV MONGO_DB="nvidia"
+ENV MONGO_COLLECTION="mnf_data"
+
+# Copy the dump file into the container
+COPY docker/mongo_export.tar.gz /dump/mongo_export.tar.gz
+
+# Extract the dump file
+RUN tar -xzvf /dump/mongo_export.tar.gz -C /dump
+
+# Copy the entrypoint script
+COPY docker/monogo-restore-entry-point.sh /docker-entrypoint.sh
+RUN chmod +x /docker-entrypoint.sh
+
+ENTRYPOINT ["/docker-entrypoint.sh"]

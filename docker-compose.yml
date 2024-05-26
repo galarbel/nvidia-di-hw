@@ -8,7 +8,10 @@ services:
       service: nx-app-base
     command: pnpm start-client
     ports:
-      - 4201:4200
+      - 4200:4200
+    depends_on:
+      - nvidia-api
+    
 
   # Express App
   nvidia-api:
@@ -19,6 +22,14 @@ services:
     ports:
       - 3333:3333
       - 4311:4311
+    depends_on:
+      - mongo
+  
+  # MongoDB
+  mongo:
+    extends:
+      file: docker-compose.db.yml
+      service: mongo
 
 volumes:
   mono-node-modules: null
