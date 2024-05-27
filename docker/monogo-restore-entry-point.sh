@@ -1,5 +1,4 @@
 #!/bin/bash
-# mongo-restore-entry-point.sh
 
 # Start MongoDB in the background
 mongod --fork --logpath /var/log/mongod.log --bind_ip_all

@@ -47,13 +47,15 @@
             "ignoreRegExpLiterals": true
           }
         ],
-        "react/jsx-one-expression-per-line": "off",
         "@typescript-eslint/no-unused-expressions": [
           "warn",
           { "allowShortCircuit": true, "allowTernary": true }
         ],
         "no-debugger": "warn",
-        "no-console": ["warn", { "allow": ["error"] }]
+        "no-console": ["warn", { "allow": ["error"] }],
+        "react/function-component-definition": "off",
+        "react/no-unknown-property": ["warn", { "ignore": ["css"] }],
+        "no-multiple-empty-lines": ["error", { "max": 2, "maxEOF": 2 }]
       }
     }
   ]

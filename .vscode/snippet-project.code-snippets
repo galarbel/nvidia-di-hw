@@ -1,0 +1,32 @@
+{
+	"console": {
+	  "prefix": ["cnl"],
+	  "body": ["console.log($1)"],
+	  "description": "Console log"
+	},
+
+	"Export Default React Pure Function Component": {
+		"prefix": "trf",
+		"body": [
+			"import { css } from \"@emotion/react\";",
+			"import { FC } from \"react\";",
+			"",
+			"export type T${TM_FILENAME_BASE}Props = {",
+			"\ttest: number,",
+			"};",
+			"\nconst rootStyle = css`\n\n`;\n",
+			"const ${TM_FILENAME_BASE}: FC<T${TM_FILENAME_BASE}Props> = (props) => {",
+			"  const { test } = props;",
+			"  return (",
+			"    <div css={rootStyle}>",
+			"      {test}",
+			"    </div>",
+			"  );",
+			"}",
+			"",
+			"export default ${TM_FILENAME_BASE};",
+			""
+		],
+		"description": "Create a default-exported React Pure Function Component."
+	}
+}
