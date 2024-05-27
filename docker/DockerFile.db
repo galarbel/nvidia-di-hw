@@ -1,6 +1,9 @@
 # Dockerfile
 FROM mongo:latest
 
+RUN apt update
+RUN apt install dos2unix
+
 # Set environment variables
 ENV MONGO_INITDB_ROOT_USERNAME=root
 ENV MONGO_INITDB_ROOT_PASSWORD=example
@@ -15,6 +18,7 @@ RUN tar -xzvf /dump/mongo_export.tar.gz -C /dump
 
 # Copy the entrypoint script
 COPY docker/monogo-restore-entry-point.sh /docker-entrypoint.sh
-RUN chmod +x /docker-entrypoint.sh
+
+RUN dos2unix /docker-entrypoint.sh && chmod +x /docker-entrypoint.sh
 
 ENTRYPOINT ["/docker-entrypoint.sh"]
