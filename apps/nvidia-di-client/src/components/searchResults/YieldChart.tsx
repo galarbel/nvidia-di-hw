@@ -1,4 +1,4 @@
-import { Line } from "@ant-design/plots";
+import { Line, LineConfig } from "@ant-design/plots";
 import { css } from "@emotion/react";
 import { FC } from "react";
 import { useSearchContext } from "../../contexts/SearchContext";
@@ -10,21 +10,13 @@ const rootStyle = css`
 const YieldChart: FC = (props) => {
   const { results } = useSearchContext();
 
-  const data = [
-    { year: "1991", value: 3 },
-    { year: "1992", value: 4 },
-    { year: "1993", value: 3.5 },
-    { year: "1994", value: 5 },
-    { year: "1995", value: 4.9 },
-    { year: "1996", value: 6 },
-    { year: "1997", value: 7 },
-    { year: "1998", value: 9 },
-    { year: "1999", value: 13 },
-  ];
+  // @ts-expect-error TODO...
+  // eslint-disable-next-line no-underscore-dangle
+  const data = results.map((item) => ({ date: item._id, value: ((item.passCount / item.totalCount) * 100).toFixed(1), passes: item.passCount }));
 
   const config = {
     data,
-    xField: "year",
+    xField: "date",
     yField: "value",
     point: {
       shapeField: "square",
@@ -38,7 +30,10 @@ const YieldChart: FC = (props) => {
     style: {
       lineWidth: 2,
     },
-  };
+    axis: {
+      y: { title: "Yield %", labelFormatter: (a: number) => `${a}%` },
+    },
+  } as LineConfig;
 
   return (
     <div css={rootStyle}>

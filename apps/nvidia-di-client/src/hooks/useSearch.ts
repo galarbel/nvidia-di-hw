@@ -3,13 +3,13 @@ import { useSearchContext } from "../contexts/SearchContext";
 import searchService from "../services/SearchService";
 
 const useSearch = () => {
-  const { dates, setResults } = useSearchContext();
+  const { dates, pnName, type, setResults } = useSearchContext();
 
   useEffect(() => {
     if (dates) {
-      searchService(dates).then((data: unknown[]) => setResults(data));
+      searchService(dates, pnName, type).then((data: unknown[]) => { setResults(data); });
     }
-  }, [dates, setResults]);
+  }, [dates, pnName, type, setResults]);
 };
 
 export default useSearch;

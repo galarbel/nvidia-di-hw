@@ -2,6 +2,7 @@ import { css } from "@emotion/react";
 import { DatePicker, Input, Select } from "antd";
 import dayjs, { Dayjs } from "dayjs";
 import React, { FC } from "react";
+import { TEST_TYPE_OPTIONS } from "../../constants/options";
 import { useSearchContext } from "../../contexts/SearchContext";
 
 const MAX_DATE = dayjs();
@@ -39,16 +40,13 @@ const SearchFilters: FC = () => {
       />
       <Input value={pnName} placeholder="PN name" onChange={onInputChange} />
       <Select
+        allowClear
+        onClear={() => onSelect("")}
         placeholder="Test Type"
-        value={type}
+        value={type || undefined}
         onSelect={onSelect}
         style={{ width: 140 }}
-        options={[
-          { value: "jack", label: "Jack" },
-          { value: "lucy", label: "Lucy" },
-          { value: "Yiminghe", label: "yiminghe" },
-          { value: "disabled", label: "Disabled", disabled: true },
-        ]}
+        options={TEST_TYPE_OPTIONS}
       />
     </div>
   );

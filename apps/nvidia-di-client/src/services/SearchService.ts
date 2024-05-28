@@ -1,8 +1,17 @@
-const searchService = async (term: unknown): Promise<unknown[]> => {
+import { Dayjs } from "dayjs";
+
+const searchService = async (dates: Dayjs[], pnName?: string, testType?: string): Promise<unknown[]> => {
   // Replace with actual API call
-  const response = await fetch(`https://api.example.com/search?q=${term}`);
+  const apiUrl = new URL(`${import.meta.env.VITE_API_URL}/mnf/`);
+  apiUrl.searchParams.append("startDate", dates[0].format("YYYY-MM-DD"));
+  apiUrl.searchParams.append("endDate", dates[1].format("YYYY-MM-DD"));
+
+  pnName?.trim() && apiUrl.searchParams.append("pnName", pnName);
+  testType?.trim() && apiUrl.searchParams.append("testType", testType);
+
+  const response = await fetch(apiUrl);
   const data = await response.json();
-  return data.results;
+  return data;
 };
 
 

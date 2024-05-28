@@ -16,7 +16,7 @@ services:
   # Express App
   nvidia-api:
     environment:
-      - MONGODB_URI=mongodb://mongo:27017/nvidia
+      - DATABASE_URL=mongodb://mongo:27017/nvidia
     extends:
       file: docker-compose.base.yml
       service: nx-app-base
