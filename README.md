@@ -54,7 +54,6 @@ Both (Client and/or API):
 Client:
 * Add react-router to save user filter selection, support refreshing the page and sharing urls
 * Enhance chart tooltip to show more info per point. (show number of tests, number of total tests)
-* Can enhance the week picker and title on the chart, and the month picker and month values. when selecting "weeks", it can potentially show only partial week data.
 * UI components lib - all UI components should sit in a UI lib and only that lib will import from antd (or other 3ed party)
 * UI/UX improvements - overall UI/UX can be improved, empty state SVGs, a bit more color, etc'.
 
