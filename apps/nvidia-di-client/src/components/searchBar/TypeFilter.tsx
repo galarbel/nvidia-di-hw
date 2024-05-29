@@ -1,8 +1,9 @@
 import { Select } from "antd";
 import { FC, useEffect } from "react";
 import { useSearchContext } from "../../contexts/SearchContext";
-import useGetTestTypes, { DEFAULT_TEST_TYPES } from "../../hooks/useGetTestTypes";
+import useGetTestTypes from "../../hooks/useGetTestTypes";
 import { stringArrayToSelectOptions } from "../../utils/utils";
+import { DEFAULT_TEST_TYPES_OPTIONS } from "../../constants/options";
 
 
 const TypeFilter: FC = () => {
@@ -16,7 +17,7 @@ const TypeFilter: FC = () => {
   }, [error]);
 
   const onSelect = (newType: string) => { setType(newType); };
-  const testTypeOptions = stringArrayToSelectOptions(error ? DEFAULT_TEST_TYPES : testTypes);
+  const testTypeOptions = stringArrayToSelectOptions(error ? DEFAULT_TEST_TYPES_OPTIONS : testTypes);
 
   return (
     <Select

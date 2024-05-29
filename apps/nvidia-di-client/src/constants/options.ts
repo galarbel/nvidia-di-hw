@@ -1,4 +1,6 @@
-export const TEST_TYPE_OPTIONS = ["Stress", "Durability", "Drop"].map((item) => ({ value: item, label: item }));
+export const DEFAULT_PN_OPTIONS = ["Everest", "Fuji", "Matterhorn", "Rainier"];
+export const DEFAULT_TEST_TYPES_OPTIONS = ["Drop", "Durability", "Humidity", "Stress"];
+
 
 export const FREQUENCY_OPTIONS = [
   { value: "h", label: "Hours" },
@@ -6,3 +8,5 @@ export const FREQUENCY_OPTIONS = [
   { value: "w", label: "Weeks" },
   { value: "m", label: "Months" },
 ];
+
+

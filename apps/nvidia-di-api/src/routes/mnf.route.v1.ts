@@ -1,5 +1,5 @@
 import { Router } from "express";
-import { downloadRawData, getAggregatedData, getAllTestTypes } from "../controllers/mnf.controller";
+import { downloadRawData, getAggregatedData, getAllPNs, getAllTestTypes } from "../controllers/mnf.controller";
 
 const router = Router();
 
@@ -9,5 +9,6 @@ const router = Router();
 router.get("/raw", downloadRawData);
 router.get("/report", getAggregatedData);
 router.get("/test-types", getAllTestTypes);
+router.get("/pns", getAllPNs);
 
 export default router;

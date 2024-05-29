@@ -64,8 +64,7 @@ export const downloadRawData = async (req, res) => {
     TEST_DATE: { $gte: new Date(startDate), $lte: new Date(endDate) },
   };
 
-  // TODO pnName being regex potentially is a problem. need to consider auto complete field UI, and not regex search here
-  pnName?.trim() && (match.PN = { $regex: pnName, $options: "i" });
+  pnName?.trim() && (match.PN = pnName);
   testType?.trim() && (match.TEST_TYPE = testType);
 
   try {
@@ -112,8 +111,7 @@ export const getAggregatedData = async (req, res) => {
     TEST_DATE: { $gte: new Date(startDate), $lte: new Date(endDate) },
   };
 
-  // TODO pnName being regex potentially is a problem. need to consider auto complete field UI, and not regex search here
-  pnName?.trim() && (match.PN = { $regex: pnName, $options: "i" });
+  pnName?.trim() && (match.PN = pnName);
   testType?.trim() && (match.TEST_TYPE = testType);
 
   const groupId = GROUP_ID_BY_GRANULARITY[granularity];
@@ -137,10 +135,21 @@ export const getAggregatedData = async (req, res) => {
   }
 };
 
-
+// this is potentially a problem if not paginated. need to understand real-life concerns and wether to paginate this or not
 export const getAllTestTypes = async (req, res) => {
   try {
     const testTypes = await MnfModel.distinct("TEST_TYPE");
+    return res.json(testTypes);
+  } catch (err) {
+    console.error(err);
+    return res.status(500).send("Error processing request");
+  }
+};
+
+// this is potentially a problem if not paginated. need to understand real-life concerns and wether to paginate this or not
+export const getAllPNs = async (req, res) => {
+  try {
+    const testTypes = await MnfModel.distinct("PN");
     return res.json(testTypes);
   } catch (err) {
     console.error(err);

@@ -46,10 +46,10 @@ I chose a monorepo for this assignment in order to leverge shared TypeScript int
 ##### Open Issues, To Dos:
 Both (Client and/or API):
 * Better use of shared libraries for various TypeScript types, common functionalities
-* Change the way PN filter works, currently it's a potential performance issue as it's a regex search on the BE. could add API for autocomplete feature on the FE to allow selecting a specific PN via autocomplete search, then match it on the report API.
 * handle date gaps in the report. i.e. if there are tests on 01-04-2023, and 03-04-2023, but no tests at all on the 02-04-2023 - the graph will simply ignore that point and the gap between points will be inconsistent. this can be handled on either FE or BE to add "blank" points when there were no tests.
 * setup production builds
 * setup lint/tests
+* PN filter and test-type filter are assuming the lists of options are small. if they are un-bounded then potentially we need to support pagination and autocomplete on the client for searching PNs/test-types.
 
 Client:
 * Add react-router to save user filter selection, support refreshing the page and sharing urls
@@ -65,3 +65,4 @@ API:
 
 DevOps (DB):
 * on each DB restart, the pod will try to reload the data, if the container was only stopped, it results in failure to import due to duplicate entries. (it should not restore in this case)
+* Lint currently works in IDE, but not from commandline.

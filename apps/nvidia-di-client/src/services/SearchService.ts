@@ -25,6 +25,13 @@ export const getAllTestTypes = async () => {
   return data;
 };
 
+export const getAllPNs = async () => {
+  const apiUrl = new URL(`${MAIN_API}/mnf/pns`);
+  const response = await fetch(apiUrl);
+  const data = await response.json();
+  return data;
+};
+
 export const getRawDataDownloadLink = (dates: Dayjs[], pnName?: string, testType?: string) => {
   const apiUrl = new URL(`${MAIN_API}/mnf/raw`);
   apiUrl.searchParams.append("startDate", dates[0].format("YYYY-MM-DD"));

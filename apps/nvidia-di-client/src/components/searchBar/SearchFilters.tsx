@@ -2,8 +2,8 @@ import { css } from "@emotion/react";
 import { FC } from "react";
 import DateRangeFilter from "./DateRangeFilter";
 import GranularityFilter from "./GranularityFilter";
-import PNNameFilter from "./PNNameFilter";
 import TypeFilter from "./TypeFilter";
+import PNFilter from "./PNFilter";
 
 
 const rootStyle = css`
@@ -15,7 +15,7 @@ const SearchFilters: FC = () => (
   <div css={rootStyle}>
     <GranularityFilter />
     <DateRangeFilter />
-    <PNNameFilter />
+    <PNFilter />
     <TypeFilter />
   </div>
 );

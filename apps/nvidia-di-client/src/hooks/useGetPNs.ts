@@ -1,19 +1,21 @@
 import { useEffect, useState } from "react";
-import { getAllTestTypes } from "../services/SearchService";
+import { getAllPNs } from "../services/SearchService";
 
-type TuseGetTestTypes = () => [boolean, string | undefined, string[]];
+type TuseGetPNs = () => [boolean, string | undefined, string[]];
+
+export const DEFAULT_TEST_TYPES = ["Drop", "Durability", "Humidity", "Stress"];
 
 const testTypes: string[] = [];
 
-const useGetTestTypes: TuseGetTestTypes = () => {
+const useGetPNs: TuseGetPNs = () => {
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const [error, setError] = useState<string>();
 
-  const doGetAllTestTypes = async () => {
+  const doGetAllPNs = async () => {
     setIsLoading(true);
     setError(undefined);
     try {
-      const res = await getAllTestTypes();
+      const res = await getAllPNs();
       testTypes.length === 0 && testTypes.push(...res);
     } catch (e) {
       setError(e as string);
@@ -22,10 +24,10 @@ const useGetTestTypes: TuseGetTestTypes = () => {
   };
 
   useEffect(() => {
-    testTypes.length === 0 && !isLoading && doGetAllTestTypes();
+    testTypes.length === 0 && !isLoading && doGetAllPNs();
   }, []);
 
   return [isLoading, error, testTypes];
 };
 
-export default useGetTestTypes;
+export default useGetPNs;
