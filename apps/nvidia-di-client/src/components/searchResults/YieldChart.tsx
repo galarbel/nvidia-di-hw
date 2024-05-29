@@ -32,19 +32,21 @@ const dataLabelHandlers = {
 } as Record<TGranularityOptions, (item: TMnfIDItem) => string>;
 
 // add * to labels with partial data
-const markPartialDates = (dates: [Dayjs, Dayjs] | undefined, granularity: string, firstDataItem: { date: string; value: string; }, lastDataItem: { date: string; value: string; }) => {
+const markPartialDates = (dates: [Dayjs, Dayjs] | undefined, granularity: string, firstDataItem: { date: string; value: number; }, lastDataItem: { date: string; value: number; }) => {
   let hasPartialDates = false;
   if (!dates) {
     return hasPartialDates;
   }
   const [startDate, endDate] = dates;
-  
+
   if (granularity === "m") {
     if (startDate.date() > 1) {
+      // eslint-disable-next-line no-param-reassign
       firstDataItem.date += "*";
       hasPartialDates = true;
     }
     if (endDate.date() < endDate.daysInMonth()) {
+      // eslint-disable-next-line no-param-reassign
       lastDataItem.date += "*";
       hasPartialDates = true;
     }
@@ -53,15 +55,16 @@ const markPartialDates = (dates: [Dayjs, Dayjs] | undefined, granularity: string
     // TODO. need to check if startDate smaller than first part of firstDataItem, and vice versa for endDate
   }
   return hasPartialDates;
-}
+};
 
 const YieldChart: FC = () => {
   const { results, granularity, dates } = useSearchContext();
 
   const data = results?.map((item) => (
-    { 
-      date: dataLabelHandlers[granularity]?.(item._id) || "", 
-      value: ((item.passTests / item.totalTests) * 100).toFixed(1) }
+    {
+      date: dataLabelHandlers[granularity]?.(item._id) || "",
+      // @ts-expect-error this seems to be ok?
+      value: ((item.passTests / item.totalTests).toFixed(3) * 100) }
   )) || [];
 
   const hasPartialDates = (data?.[0] && markPartialDates(dates, granularity, data[0], data[data.length - 1]));
@@ -89,9 +92,10 @@ const YieldChart: FC = () => {
 
   return (
     <div css={rootStyle}>
-      { /* eslint-disable-next-line react/jsx-props-no-spreading. this is a bad key. but seems to be an issue with the canvas. */ }
+      { /* this is a bad key. but seems to be an issue with the canvas. */}
+      { /* eslint-disable-next-line react/jsx-props-no-spreading */ }
       <Line {...config} key={granularity} />
-      <i className="partial-info" style={{ visibility: hasPartialDates ? "visible": "hidden"}}>* - partial data</i>
+      <i className="partial-info" style={{ visibility: hasPartialDates ? "visible" : "hidden" }}>* - partial data</i>
     </div>
   );
 };
