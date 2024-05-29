@@ -1,5 +1,5 @@
 import { Select } from "antd";
-import { FC } from "react";
+import { FC, useEffect } from "react";
 import { useSearchContext } from "../../contexts/SearchContext";
 import useGetTestTypes, { DEFAULT_TEST_TYPES } from "../../hooks/useGetTestTypes";
 import { stringArrayToSelectOptions } from "../../utils/utils";
@@ -10,6 +10,10 @@ const TypeFilter: FC = () => {
   const { type, setType } = searchContext;
 
   const [isLoading, error, testTypes] = useGetTestTypes();
+
+  useEffect(() => {
+    error && console.error("Failed fetching test types, defaulting to a closed list");
+  }, [error]);
 
   const onSelect = (newType: string) => { setType(newType); };
   const testTypeOptions = stringArrayToSelectOptions(error ? DEFAULT_TEST_TYPES : testTypes);

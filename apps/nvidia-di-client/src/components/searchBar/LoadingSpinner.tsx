@@ -1,21 +1,19 @@
 import { css } from "@emotion/react";
 import { Spin } from "antd";
 import { FC } from "react";
-import { useSearchContext } from "../../contexts/SearchContext";
 
+export type TLoadingSpinnerProps = {
+  isLoading: boolean,
+};
 
 const rootStyle = css`
 
 `;
 
-const LoadingSpinner: FC = (props) => {
-  const { results } = useSearchContext();
-
-  return (
-    <div css={rootStyle}>
-      {!results && <Spin />}
-    </div>
-  );
-};
+const LoadingSpinner: FC<TLoadingSpinnerProps> = ({ isLoading }) => (
+  <div css={rootStyle}>
+    {isLoading && <Spin />}
+  </div>
+);
 
 export default LoadingSpinner;

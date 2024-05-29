@@ -100,7 +100,6 @@ export const downloadRawData = async (req, res) => {
     res.write(parser.parse(fields.reduce((acc, key) => { acc[key] = key; return acc; }, {}))); // write the header row
 
     cursor.eachAsync(doc => {
-      debugger;
       const csvRow = parser.parse(doc.toObject());
       res.write('\n' + csvRow);
     }).then(() => {

@@ -21,13 +21,13 @@ const rootStyle = css`
 `;
 
 const TestResultsPage: FC = () => {
-  const [isLoading, error] = useSearch();
+  const [isLoading] = useSearch();
 
   return (
     <div css={rootStyle}>
       <div>
         <SearchFilters />
-        <LoadingSpinner />
+        <LoadingSpinner isLoading={isLoading as boolean} />
       </div>
       <YieldChart />
       <DownloadRawButton />

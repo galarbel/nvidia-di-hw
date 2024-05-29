@@ -10,7 +10,6 @@ const GranularityFilter: FC = () => {
   const { granularity, setGranularity, setResults } = searchContext;
 
   const onSelect = (newGranularity: TGranularityOptions) => {
-    setResults(undefined);
     setGranularity(newGranularity);
   };
 

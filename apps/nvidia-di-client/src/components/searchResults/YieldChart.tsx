@@ -2,13 +2,14 @@ import { Line, LineConfig } from "@ant-design/plots";
 import { css } from "@emotion/react";
 import { TMnfIDItem } from "@nvidia-di/interfaces";
 import { Dayjs } from "dayjs";
-import { FC } from "react";
+import { FC, useMemo } from "react";
 import { TGranularityOptions } from "../../constants/types";
 import { useSearchContext } from "../../contexts/SearchContext";
 import { getWeekDates } from "../../utils/utils";
 
-
 const rootStyle = css`
+  min-height: calc(80vh - 200px);
+
   margin-top: 10px;
   border: 1px solid #cdcdcd;
   border-radius: 6px;
@@ -18,6 +19,17 @@ const rootStyle = css`
     text-align: right;
     padding: 6px;
     font-size: 12px;
+  }
+
+  &.no-results {
+    display: flex;
+
+
+    > div {
+      flex:1;
+      text-align: center;
+      align-self: center;
+    }
   }
 `;
 
@@ -32,7 +44,12 @@ const dataLabelHandlers = {
 } as Record<TGranularityOptions, (item: TMnfIDItem) => string>;
 
 // add * to labels with partial data
-const markPartialDates = (dates: [Dayjs, Dayjs] | undefined, granularity: string, firstDataItem: { date: string; value: number; }, lastDataItem: { date: string; value: number; }) => {
+const markPartialDates = (
+  dates: [Dayjs, Dayjs] | undefined,
+  granularity: string,
+  firstDataItem: { date: string; value: number; },
+  lastDataItem: { date: string; value: number; },
+) => {
   let hasPartialDates = false;
   if (!dates) {
     return hasPartialDates;
@@ -60,12 +77,13 @@ const markPartialDates = (dates: [Dayjs, Dayjs] | undefined, granularity: string
 const YieldChart: FC = () => {
   const { results, granularity, dates } = useSearchContext();
 
-  const data = results?.map((item) => (
+  const data = useMemo(() => results?.map((item) => (
     {
       date: dataLabelHandlers[granularity]?.(item._id) || "",
       // @ts-expect-error this seems to be ok?
       value: ((item.passTests / item.totalTests).toFixed(3) * 100) }
-  )) || [];
+  )) || [], [results]);
+
 
   const hasPartialDates = (data?.[0] && markPartialDates(dates, granularity, data[0], data[data.length - 1]));
 
@@ -90,11 +108,18 @@ const YieldChart: FC = () => {
     },
   } as LineConfig;
 
+  if (data.length === 0) {
+    return (
+      <div css={rootStyle} className="no-results">
+        <div>No results found for specificed filters.</div>
+      </div>
+    );
+  }
+
   return (
     <div css={rootStyle}>
-      { /* this is a bad key. but seems to be an issue with the canvas. */}
       { /* eslint-disable-next-line react/jsx-props-no-spreading */ }
-      <Line {...config} key={granularity} />
+      <Line {...config} />
       <i className="partial-info" style={{ visibility: hasPartialDates ? "visible" : "hidden" }}>* - partial data</i>
     </div>
   );
