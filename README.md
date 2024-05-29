@@ -67,3 +67,7 @@ DevOps (DB):
 * Missing index on the data!! I didn't put one up because I wasn't sure if this was done on pourpose or not. but we're querying a lot of data so it seems to make sense to have few indexes and even index groups
 * on each DB restart, the pod will try to reload the data, if the container was only stopped, it results in failure to import due to duplicate entries. (it should not restore in this case)
 * Lint currently works in IDE, but not from cli.
+
+Comment about cursor:
+I decided to let mongoose handle the cursor for me, behind the scenes it supports the required operations, and I didn't see a reason to create my own custom one.
+if need-be - we can easily create our own cursor implementaion and connect directly without ORM/ODM.

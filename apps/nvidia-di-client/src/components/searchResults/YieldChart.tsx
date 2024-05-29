@@ -39,7 +39,7 @@ const dataLabelHandlers = {
   h: (item) => `${item.hour}:00`,
   d: (item) => `${item.year}-${item.month}-${item.day}`,
   w: (item) => dayjs().year(item.year).week(item.week).format("YYYY - wo"),
-  m: (item) => dayjs().month(item.month).format("MMMM"),
+  m: (item) => dayjs().month(item.month - 1).format("MMMM"), // NEED TO FIX MONTH HERE. starts from 0 on client!
 } as Record<TGranularityOptions, (item: TMnfIDItem) => string>;
 
 
