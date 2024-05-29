@@ -1,11 +1,11 @@
 import { TAPIRepsonseMnfReport } from "@nvidia-di/interfaces";
 import { Dayjs } from "dayjs";
 
-const MAIN_API = import.meta.env.VITE_API_URL
+const MAIN_API = `${import.meta.env.VITE_API_URL}/api/v1`;
 
 export const searchService = async (granularity: string, dates: Dayjs[], pnName?: string, testType?: string): Promise<TAPIRepsonseMnfReport> => {
   // Replace with actual API call
-  const apiUrl = new URL(`${MAIN_API}/mnf/`);
+  const apiUrl = new URL(`${MAIN_API}/mnf/report/`);
   apiUrl.searchParams.append("granularity", granularity);
   apiUrl.searchParams.append("startDate", dates[0].format("YYYY-MM-DD"));
   apiUrl.searchParams.append("endDate", dates[1].format("YYYY-MM-DD"));
@@ -33,5 +33,5 @@ export const getRawDataDownloadLink = (dates: Dayjs[], pnName?: string, testType
   testType?.trim() && apiUrl.searchParams.append("testType", testType);
 
   return apiUrl.toString();
-}
+};
 
