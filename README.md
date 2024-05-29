@@ -62,3 +62,6 @@ Client:
 API:
 * Change controllers to a more OOP approach (Classes vs Functions). since this is a small project and my first time setting up Node/Express server I went with a little basic.
 * Range limit protection. I've put a limit on the FE to the ammount of dates you can pick per granularity, need to also protect the BE.
+
+DevOps (DB):
+* on each DB restart, the pod will try to reload the data, if the container was only stopped, it results in failure to import due to duplicate entries. (it should not restore in this case)
