@@ -13,7 +13,7 @@ docker compose up
 ```
 
 ### How to run locally:
-the project was created with Node 22, but should work for node 18+
+the project was created with Node 22, but should work for node 18+.
 it also uses pnpm v8 ([v9 is not working well with nx](https://github.com/nrwl/nx/issues/22850))
 
 suggested to use nvm, or nvm windows
