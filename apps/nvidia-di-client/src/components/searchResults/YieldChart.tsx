@@ -1,9 +1,8 @@
 import { Line, LineConfig } from "@ant-design/plots";
 import { css } from "@emotion/react";
-import { TMnfIDItem } from "@nvidia-di/interfaces";
+import { TGranularityOptions, TMnfIDItem } from "@nvidia-di/interfaces";
 import { Dayjs } from "dayjs";
 import { FC, useMemo } from "react";
-import { TGranularityOptions } from "../../constants/types";
 import { useSearchContext } from "../../contexts/SearchContext";
 import { getWeekDates } from "../../utils/utils";
 
@@ -77,13 +76,13 @@ const markPartialDates = (
 const YieldChart: FC = () => {
   const { results, granularity, dates } = useSearchContext();
 
-  const data = useMemo(() => results?.map((item) => (
-    {
+  const data = useMemo(() => results?.map((item) => {
+    const value = parseFloat(((item.passTests / item.totalTests) * 100).toFixed(1));
+    return {
       date: dataLabelHandlers[granularity]?.(item._id) || "",
-      // @ts-expect-error this seems to be ok?
-      value: ((item.passTests / item.totalTests).toFixed(3) * 100) }
-  )) || [], [results]);
-
+      value,
+    };
+  }) || [], [results]);
 
   const hasPartialDates = (data?.[0] && markPartialDates(dates, granularity, data[0], data[data.length - 1]));
 
@@ -95,10 +94,8 @@ const YieldChart: FC = () => {
       shapeField: "square",
       sizeField: 3,
     },
-    interaction: {
-      tooltip: {
-        marker: false,
-      },
+    tooltip: {
+      title: false,
     },
     style: {
       lineWidth: 1,
