@@ -5,7 +5,7 @@
 
 import cors from "cors";
 import express from 'express';
-import { connectDB } from './config/database.js';
+import { connectDB } from './config/database';
 import mnfRoutes from "./routes/mnf.route";
 
 const app = express();

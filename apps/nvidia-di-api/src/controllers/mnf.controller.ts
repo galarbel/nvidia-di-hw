@@ -1,5 +1,7 @@
+import { Parser } from '@json2csv/plainjs';
 import { Request, Response } from 'express';
-import MnfModel from '../models/mnf.model';
+import { default as MnfModel, default as mnfModel } from '../models/mnf.model';
+
 
 interface IRequestQueryParams {
   startDate?: string, 
@@ -70,3 +72,116 @@ async function getMnfsGroupedByDate(startDate: Date, endDate: Date, pnName?: str
     throw new Error('Failed to fetch aggregated mnfs');
   }
 }
+
+export const downloadRawData = async (req, res) => {
+  const { startDate, endDate, pnName, testType } = req.query;
+
+  const query = {};
+  if (startDate || endDate) {
+    query["TEST_DATE"] = {};
+    if (startDate) query["TEST_DATE"].$gte = new Date(startDate);
+    if (endDate) query["TEST_DATE"].$lte = new Date(endDate);
+  }
+  if (pnName) query["PN"] = pnName;
+  if (testType) query["TEST_TYPE"] = testType;
+
+  try {
+    const cursor = MnfModel.find(query).cursor();
+
+    const fields = Object.keys(mnfModel.schema.paths);
+    fields.pop();
+
+    const opts = { fields, header: false };
+    const parser = new Parser(opts);
+    let csv = '';
+
+    res.setHeader('Content-Type', 'text/csv');
+    res.setHeader('Content-Disposition', 'attachment; filename="data.csv"');
+    res.write(parser.parse(fields.reduce((acc, key) => { acc[key] = key; return acc; }, {}))); // write the header row
+
+    cursor.eachAsync(doc => {
+      debugger;
+      const csvRow = parser.parse(doc.toObject());
+      res.write('\n' + csvRow);
+    }).then(() => {
+      res.end();
+    }).catch(err => {
+      console.error(err);
+      res.status(500).send('Error retrieving data');
+    });
+  } catch (err) {
+    console.error(err);
+    res.status(500).send('Error processing request');
+  }
+};
+
+export const getAggregatedData = async (req, res) => {
+  const { startDate, endDate, granularity, pnName, testType } = req.query;
+
+  // Validate granularity
+  if (!['h', 'd', 'w', 'm'].includes(granularity)) {
+    return res.status(400).send('Invalid granularity. Must be "h", "d", "w", or "m".');
+  }
+
+  const match = {};
+  if (startDate) match["TEST_DATE"] = { $gte: new Date(startDate) };
+  if (endDate) match["TEST_DATE"] = { ...match["TEST_DATE"], $lte: new Date(endDate) };
+  
+  pnName?.trim() && (match["PN"] = { $regex: pnName, $options: 'i' });
+  testType?.trim() && (match["TEST_TYPE"] = testType);
+
+  let groupId;
+  if (granularity === 'h') {
+    groupId = {
+      year: { $year: '$TEST_DATE' },
+      month: { $month: '$TEST_DATE' },
+      day: { $dayOfMonth: '$TEST_DATE' },
+      hour: { $hour: '$TEST_DATE' },
+    };
+  } else if (granularity === 'd') {
+    groupId = {
+      year: { $year: '$TEST_DATE' },
+      month: { $month: '$TEST_DATE' },
+      day: { $dayOfMonth: '$TEST_DATE' },
+    };
+  } else if (granularity === 'w') {
+    groupId = {
+      year: { $year: '$TEST_DATE' },
+      week: { $week: '$TEST_DATE' },
+    };
+  } else if (granularity === 'm') {
+    groupId = {
+      year: { $year: '$TEST_DATE' },
+      month: { $month: '$TEST_DATE' },
+    };
+  }
+
+  try {
+    const result = await MnfModel.aggregate([
+      { $match: match },
+      {
+        $group: {
+          _id: groupId,
+          totalTests: { $sum: 1 },
+          passTests: { $sum: { $cond: [{ $eq: ['$PASS', 1] }, 1, 0] } },
+        },
+      },
+      { $sort: { '_id.year': 1, '_id.month': 1, '_id.day': 1, '_id.hour': 1, '_id.week': 1 } },
+    ]);
+
+    res.json(result);
+  } catch (err) {
+    console.error(err);
+    res.status(500).send('Error processing request');
+  }
+};
+
+export const getAllTestTypes = async (req, res) => {
+  try {
+    const testTypes = await MnfModel.distinct('TEST_TYPE');
+    res.json(testTypes);
+  } catch (err) {
+    console.error(err);
+    res.status(500).send('Error processing request');
+  }
+};

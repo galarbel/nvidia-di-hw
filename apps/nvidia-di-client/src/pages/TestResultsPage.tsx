@@ -1,7 +1,8 @@
 import { css } from "@emotion/react";
 import { FC } from "react";
-import CommonButton from "../components/common/Button";
+import LoadingSpinner from "../components/searchBar/LoadingSpinner";
 import SearchFilters from "../components/searchBar/SearchFilters";
+import DownloadRawButton from "../components/searchResults/DownloadRawButton";
 import YieldChart from "../components/searchResults/YieldChart";
 import useSearch from "../hooks/useSearch";
 
@@ -11,22 +12,25 @@ const rootStyle = css`
   gap: 10px;
   padding: 20px;
 
-  > .download-raw-btn-wrap {
-    text-align: right;
-    padding-right: 40px;
+  > div:first-of-type {
+    display: flex;
+    flex-direction: row;
+    justify-content: space-between;
+    align-items: center;
   }
 `;
 
 const TestResultsPage: FC = () => {
-  useSearch();
+  const [isLoading, error] = useSearch();
 
   return (
     <div css={rootStyle}>
-      <SearchFilters />
-      <YieldChart />
-      <div className="download-raw-btn-wrap">
-        <CommonButton>Download raw data</CommonButton>
+      <div>
+        <SearchFilters />
+        <LoadingSpinner />
       </div>
+      <YieldChart />
+      <DownloadRawButton />
     </div>
   );
 };

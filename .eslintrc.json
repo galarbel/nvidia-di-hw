@@ -16,8 +16,8 @@
       "files": ["*.ts", "*.tsx", "*.js", "*.jsx"],
       "rules": {
         "react/react-in-jsx-scope": "off",
-        "@typescript-eslint/no-unused-vars": "warn",
-        "no-unused-vars": "warn",
+        "@typescript-eslint/no-unused-vars": ["warn", { "argsIgnorePattern": "^_" }],
+        "no-unused-vars": ["warn", { "argsIgnorePattern": "^_"  }],
         "@nx/enforce-module-boundaries": [
           "warn",
           {
@@ -55,7 +55,9 @@
         "no-console": ["warn", { "allow": ["error"] }],
         "react/function-component-definition": "off",
         "react/no-unknown-property": ["warn", { "ignore": ["css"] }],
-        "no-multiple-empty-lines": ["error", { "max": 2, "maxEOF": 2 }]
+        "no-multiple-empty-lines": ["error", { "max": 2, "maxEOF": 2 }],
+        "react-hooks/exhaustive-deps": "off",
+        "no-underscore-dangle": ["warn", { "allow": ["_id"]}]
       }
     }
   ]

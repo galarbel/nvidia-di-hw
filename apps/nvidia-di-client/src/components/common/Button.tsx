@@ -4,6 +4,8 @@ import { FC, ReactNode } from "react";
 
 export type TButtonProps = {
   children: ReactNode,
+  // eslint-disable-next-line react/require-default-props
+  onClick?: () => void
 };
 
 const rootStyle = css`
@@ -16,9 +18,9 @@ const rootStyle = css`
 `;
 
 const CommonButton: FC<TButtonProps> = (props) => {
-  const { children } = props;
+  const { children, onClick } = props;
   return (
-    <Button css={rootStyle}>
+    <Button css={rootStyle} onClick={onClick}>
       {children}
     </Button>
   );
