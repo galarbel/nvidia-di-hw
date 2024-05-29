@@ -3,8 +3,13 @@
   "ignorePatterns": ["!**/*"],
   "overrides": [
     {
+      "parserOptions": {
+        "project": ["apps/nvidia-di-api/tsconfig.*?.json"]
+      },
       "files": ["*.ts", "*.tsx", "*.js", "*.jsx"],
-      "rules": {}
+      "rules": {
+        "no-console": "off"
+      }
     },
     {
       "files": ["*.ts", "*.tsx"],

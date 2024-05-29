@@ -1,9 +1,8 @@
 /* eslint-disable react/jsx-no-constructed-context-values */
-import { TAPIRepsonseMnfReport } from "@nvidia-di/interfaces";
+import { TAPIRepsonseMnfReport, TGranularityOptions } from "@nvidia-di/interfaces";
 import { Dayjs } from "dayjs";
 import { FC, PropsWithChildren, createContext, useContext, useState } from "react";
 import { DEFAULT_END_DATE, DEFAULT_START_DATE } from "../constants/defaults";
-import { TGranularityOptions } from "../constants/types";
 
 type TSearchContext = {
   granularity: TGranularityOptions,

@@ -1,6 +1,6 @@
-import mongoose, { Document, Schema } from 'mongoose';
+import mongoose, { Document, Schema } from "mongoose";
 
-export interface Mnf extends Document {
+export interface IMnf extends Document {
   _id: mongoose.Types.ObjectId;
   PN: string;
   SN: string;
@@ -9,28 +9,28 @@ export interface Mnf extends Document {
   TEST_DATE: Date;
 }
 
-const MnfSchema = new Schema<Mnf>({
+const MnfSchema = new Schema<IMnf>({
   PN: {
     type: String,
-    required: true
+    required: true,
   },
   SN: {
     type: String,
-    required: true
+    required: true,
   },
   TEST_TYPE: {
     type: String,
-    required: true
+    required: true,
   },
   PASS: {
     type: Number,
-    required: true
+    required: true,
   },
   TEST_DATE: {
     type: Date,
     required: true,
-    default: Date.now
-  }
-}, { collection: 'mnf_data' });
+    default: Date.now,
+  },
+}, { collection: "mnf_data" });
 
-export default mongoose.model<Mnf>('Mnf', MnfSchema);
+export default mongoose.model<IMnf>("Mnf", MnfSchema);

@@ -1,7 +1,7 @@
+import { TGranularityOptions } from "@nvidia-di/interfaces";
 import { DatePicker, DatePickerProps } from "antd";
 import dayjs, { Dayjs } from "dayjs";
 import { FC, useEffect } from "react";
-import { TGranularityOptions } from "../../constants/types";
 import { useSearchContext } from "../../contexts/SearchContext";
 
 const { RangePicker } = DatePicker;

@@ -1,160 +1,122 @@
-import { Parser } from '@json2csv/plainjs';
-import { Request, Response } from 'express';
-import { default as MnfModel, default as mnfModel } from '../models/mnf.model';
+import { Parser, type ParserOptions } from "@json2csv/plainjs";
+import { TAPIRequestQueryParams } from "@nvidia-di/interfaces";
+import { FilterQuery } from "mongoose";
+import MnfModel, { IMnf } from "../models/mnf.model";
+import { strArrToDict } from "../utils/common.utils";
+import { getMnfFields } from "../utils/mnf.utils";
 
+const CURSOR_BATCH_SIZE = 200;
 
-interface IRequestQueryParams {
-  startDate?: string, 
-  endDate?: string, 
-  pnName?: string, 
-  testType?: string,
-}
+const GROUP_ID_BY_GRANULARITY = {
+  h: {
+    year: { $year: "$TEST_DATE" },
+    month: { $month: "$TEST_DATE" },
+    day: { $dayOfMonth: "$TEST_DATE" },
+    hour: { $hour: "$TEST_DATE" },
+  },
+  d: {
+    year: { $year: "$TEST_DATE" },
+    month: { $month: "$TEST_DATE" },
+    day: { $dayOfMonth: "$TEST_DATE" },
+  },
+  w: {
+    year: { $year: "$TEST_DATE" },
+    week: { $week: "$TEST_DATE" },
+  },
+  m: {
+    year: { $year: "$TEST_DATE" },
+    month: { $month: "$TEST_DATE" },
+  },
+} as const;
 
-export const getMnfs = async (req: Request, res: Response) => {
-  try {
-    const { startDate, endDate, pnName, testType }: IRequestQueryParams = req.query;
-
-    if (!startDate || !endDate) {
-      return res.status(400).json({ error: 'start and end date are mandatory' });
-    }
-
-    const startDateObj = new Date(startDate as string);
-    const endDateObj = new Date(endDate as string);
-    if (isNaN(startDateObj.getTime()) || isNaN(endDateObj.getTime())) {
-      return res.status(400).json({ error: 'Invalid start or end date' });
-    }
-
-    const mnfs = await getMnfsGroupedByDate(startDateObj, endDateObj, pnName, testType);
-   
-    res.json(mnfs);
-  } catch (error) {
-    console.error(error)
-    res.status(500).json({ error: 'Failed to fetch users' });
-  }
+const validateStartEndDate = (startDate, endDate) => {
+  const errors = [];
+  !startDate && errors.push("startDate is mandatory");
+  !endDate && errors.push("endDate is mandatory");
+  startDate && Number.isNaN(new Date(startDate).getTime()) && errors.push("Invalid startDate");
+  endDate && Number.isNaN(new Date(endDate).getTime()) && errors.push("Invalid endDate");
+  return errors;
 };
 
-async function getMnfsGroupedByDate(startDate: Date, endDate: Date, pnName?: string, testType?: string): Promise<any[]> {
-  const matchFilters = {
-    TEST_DATE: { $gte: startDate, $lte: endDate }
-  };
+const getAggregatedDataValidationErrors = (req) => {
+  const { startDate, endDate, granularity }: TAPIRequestQueryParams = req.query;
 
-  pnName?.trim() && (matchFilters["PN"] = { $regex: pnName, $options: 'i' });
-  testType?.trim() && (matchFilters["TEST_TYPE"] = testType);
+  const errors = [...validateStartEndDate(startDate, endDate)];
+  !GROUP_ID_BY_GRANULARITY[granularity] && errors.push("Invalid granularity. Must be \"h\", \"d\", \"w\", or \"m\".");
+  return errors.length > 0 ? errors : null;
+};
 
-  try {
-    const mnfsAggregated = await MnfModel.aggregate([
-      {
-        $match: matchFilters
-      },
-      {
-        $addFields: {
-          date: { $dateToString: { format: '%Y-%m-%d', date: '$TEST_DATE' } }
-        }
-      },
-      {
-        $group: {
-          _id: '$date',
-          totalCount: { $sum: 1 }, // Count of documents for each date
-          passCount: { $sum: { $cond: [{ $eq: ['$PASS', 1] }, 1, 0] } } // Count of documents where PASS is 1
-        }
-      },
-      {
-        $sort: { _id: 1 } // Optional: Sort by date
-      }
-    ])
-    
-    
-
-    .exec(); // Add .exec() to execute the aggregation
-
-    return mnfsAggregated;
-  } catch (error) {
-    throw new Error('Failed to fetch aggregated mnfs');
-  }
-}
+const getDownloadRawDataErrors = (req) => {
+  const { startDate, endDate }: TAPIRequestQueryParams = req.query;
+  const res = validateStartEndDate(startDate, endDate);
+  return res.length > 0 ? res : null;
+};
 
 export const downloadRawData = async (req, res) => {
-  const { startDate, endDate, pnName, testType } = req.query;
+  const { startDate, endDate, pnName, testType }: TAPIRequestQueryParams = req.query;
 
-  const query = {};
-  if (startDate || endDate) {
-    query["TEST_DATE"] = {};
-    if (startDate) query["TEST_DATE"].$gte = new Date(startDate);
-    if (endDate) query["TEST_DATE"].$lte = new Date(endDate);
+  const errors = getDownloadRawDataErrors(req);
+  if (errors) {
+    return res.status(400).json({ status: "error", errors });
   }
-  if (pnName) query["PN"] = pnName;
-  if (testType) query["TEST_TYPE"] = testType;
+
+  const match: FilterQuery<IMnf> = {
+    TEST_DATE: { $gte: new Date(startDate), $lte: new Date(endDate) },
+  };
+
+  // TODO pnName being regex potentially is a problem. need to consider auto complete field UI, and not regex search here
+  pnName?.trim() && (match.PN = { $regex: pnName, $options: "i" });
+  testType?.trim() && (match.TEST_TYPE = testType);
 
   try {
-    const cursor = MnfModel.find(query).cursor();
+    const cursor = MnfModel.find(match).cursor();
 
-    const fields = Object.keys(mnfModel.schema.paths);
-    fields.pop();
+    const fields = getMnfFields();
 
-    const opts = { fields, header: false };
+    const opts: ParserOptions = { fields, header: false };
     const parser = new Parser(opts);
-    let csv = '';
 
-    res.setHeader('Content-Type', 'text/csv');
-    res.setHeader('Content-Disposition', 'attachment; filename="data.csv"');
-    res.write(parser.parse(fields.reduce((acc, key) => { acc[key] = key; return acc; }, {}))); // write the header row
+    res.setHeader("Content-Type", "text/csv");
+    res.setHeader("Content-Disposition", "attachment; filename=\"data.csv\"");
 
-    cursor.eachAsync(doc => {
-      const csvRow = parser.parse(doc.toObject());
-      res.write('\n' + csvRow);
-    }).then(() => {
-      res.end();
-    }).catch(err => {
-      console.error(err);
-      res.status(500).send('Error retrieving data');
-    });
+    res.write(parser.parse(strArrToDict(fields))); // write the header row
+
+    try {
+      await cursor.eachAsync((docs) => {
+        docs.forEach((doc) => {
+          const csvRow = parser.parse(doc.toObject());
+          res.write(`\n${csvRow}`);
+        });
+      }, { batchSize: CURSOR_BATCH_SIZE });
+      return res.end();
+    } catch (e) {
+      console.error(e);
+      return res.status(500).send("Error retrieving data");
+    }
   } catch (err) {
     console.error(err);
-    res.status(500).send('Error processing request');
+    return res.status(500).send("Error processing request");
   }
 };
 
+
 export const getAggregatedData = async (req, res) => {
-  const { startDate, endDate, granularity, pnName, testType } = req.query;
+  const { startDate, endDate, granularity, pnName, testType }: TAPIRequestQueryParams = req.query;
 
-  // Validate granularity
-  if (!['h', 'd', 'w', 'm'].includes(granularity)) {
-    return res.status(400).send('Invalid granularity. Must be "h", "d", "w", or "m".');
+  const errors = getAggregatedDataValidationErrors(req);
+  if (errors) {
+    return res.status(400).json({ status: "error", errors });
   }
 
-  const match = {};
-  if (startDate) match["TEST_DATE"] = { $gte: new Date(startDate) };
-  if (endDate) match["TEST_DATE"] = { ...match["TEST_DATE"], $lte: new Date(endDate) };
-  
-  pnName?.trim() && (match["PN"] = { $regex: pnName, $options: 'i' });
-  testType?.trim() && (match["TEST_TYPE"] = testType);
+  const match: FilterQuery<IMnf> = {
+    TEST_DATE: { $gte: new Date(startDate), $lte: new Date(endDate) },
+  };
 
-  let groupId;
-  if (granularity === 'h') {
-    groupId = {
-      year: { $year: '$TEST_DATE' },
-      month: { $month: '$TEST_DATE' },
-      day: { $dayOfMonth: '$TEST_DATE' },
-      hour: { $hour: '$TEST_DATE' },
-    };
-  } else if (granularity === 'd') {
-    groupId = {
-      year: { $year: '$TEST_DATE' },
-      month: { $month: '$TEST_DATE' },
-      day: { $dayOfMonth: '$TEST_DATE' },
-    };
-  } else if (granularity === 'w') {
-    groupId = {
-      year: { $year: '$TEST_DATE' },
-      week: { $week: '$TEST_DATE' },
-    };
-  } else if (granularity === 'm') {
-    groupId = {
-      year: { $year: '$TEST_DATE' },
-      month: { $month: '$TEST_DATE' },
-    };
-  }
+  // TODO pnName being regex potentially is a problem. need to consider auto complete field UI, and not regex search here
+  pnName?.trim() && (match.PN = { $regex: pnName, $options: "i" });
+  testType?.trim() && (match.TEST_TYPE = testType);
 
+  const groupId = GROUP_ID_BY_GRANULARITY[granularity];
   try {
     const result = await MnfModel.aggregate([
       { $match: match },
@@ -162,25 +124,26 @@ export const getAggregatedData = async (req, res) => {
         $group: {
           _id: groupId,
           totalTests: { $sum: 1 },
-          passTests: { $sum: { $cond: [{ $eq: ['$PASS', 1] }, 1, 0] } },
+          passTests: { $sum: { $cond: [{ $eq: ["$PASS", 1] }, 1, 0] } },
         },
       },
-      { $sort: { '_id.year': 1, '_id.month': 1, '_id.day': 1, '_id.hour': 1, '_id.week': 1 } },
+      { $sort: { "_id.year": 1, "_id.month": 1, "_id.day": 1, "_id.hour": 1, "_id.week": 1 } },
     ]);
 
-    res.json(result);
+    return res.json(result);
   } catch (err) {
     console.error(err);
-    res.status(500).send('Error processing request');
+    return res.status(500).send("Error processing request");
   }
 };
 
+
 export const getAllTestTypes = async (req, res) => {
   try {
-    const testTypes = await MnfModel.distinct('TEST_TYPE');
-    res.json(testTypes);
+    const testTypes = await MnfModel.distinct("TEST_TYPE");
+    return res.json(testTypes);
   } catch (err) {
     console.error(err);
-    res.status(500).send('Error processing request');
+    return res.status(500).send("Error processing request");
   }
 };

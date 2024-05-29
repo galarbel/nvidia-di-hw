@@ -1,3 +1,5 @@
+import { TGranularityOptions } from "./options";
+
 export type TMnfIDItem = {
   week: number;
   hour: number;
@@ -11,3 +13,11 @@ export type TAPIRepsonseMnfReport = {
   totalTests: number,
   passTests: number
 }[];
+
+export type TAPIRequestQueryParams = {
+  startDate?: string,
+  endDate?: string,
+  pnName?: string,
+  testType?: string,
+  granularity?: TGranularityOptions
+};
