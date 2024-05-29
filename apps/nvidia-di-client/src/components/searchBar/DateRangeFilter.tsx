@@ -20,11 +20,15 @@ const granularityChangeHandlers = {
   },
   w: ([startDate, endDate], setDates) => {
     const dayDiff = endDate.diff(startDate, "day");
-    (dayDiff < 7 || dayDiff > 120) && setDates([startDate, startDate.add(3, "week")]);
+    let newEndDate = endDate;
+    dayDiff < 7 && (newEndDate = newEndDate.add(2, "week"));
+    dayDiff > 60 && (newEndDate = startDate.add(3, "week"));
+
+    setDates([startDate.startOf("week"), newEndDate.endOf("week")]);
   },
   m: ([startDate, endDate], setDates) => {
-    const dayDiff = endDate.diff(startDate, "day");
-    (dayDiff < 30) && setDates([startDate, startDate.add(2, "month")]);
+    const newEndDate = endDate.diff(startDate, "month") < 2 ? startDate.add(2, "months") : endDate;
+    setDates([startDate.startOf("month"), newEndDate.endOf("month")]);
   },
 } as Record<TGranularityOptions, TGranularityChangeHandler>;
 
@@ -34,6 +38,11 @@ const pickerLimits = {
   m: 365,
 };
 
+const pickerTypeByGranularity = {
+  w: "week",
+  m: "month",
+} as Record<TGranularityOptions, "week" | "month">;
+
 
 const DateRangeFilter: FC = () => {
   const searchContext = useSearchContext();
@@ -42,6 +51,15 @@ const DateRangeFilter: FC = () => {
   const onSingleDateChange = (newDate: Dayjs) => newDate && setDates([newDate, newDate.add(1, "day")]);
 
   const onDatesChange = (newDates: [Dayjs, Dayjs]) => {
+    const [newStartDate, newEndDate] = newDates;
+    if (granularity === "w") {
+      setDates([newStartDate.startOf("week"), newEndDate.endOf("week")]);
+      return;
+    }
+    if (granularity === "m") {
+      setDates([newStartDate.startOf("month"), newEndDate.endOf("month")]);
+      return;
+    }
     setDates(newDates);
   };
 
@@ -82,6 +100,7 @@ const DateRangeFilter: FC = () => {
       maxDate={MAX_DATE}
       allowClear={false}
       disabledDate={numDaysLimiter}
+      picker={pickerTypeByGranularity[granularity] || "date"}
     />
   );
 };
